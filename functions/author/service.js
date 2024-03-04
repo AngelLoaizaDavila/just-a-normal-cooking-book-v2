@@ -24,7 +24,7 @@ module.exports.createAuthor = async (data) => {
   return author;
 };
 
-module.exports.searchAuthor = async (data) => {
+module.exports.searchAuthorWithAuthorEmail = async (data) => {
   const { email } = data;
   if (!email) {
     throw createError(400, "Missing required param");
@@ -40,7 +40,7 @@ module.exports.searchAuthor = async (data) => {
   await mongo.disconnect();
   return author;
 };
-module.exports.searchAuthorAndPopulateRecipe = async (data) => {
+module.exports.searchAuthorAndPopulateRecipeWithAuthorEmail = async (data) => {
   const { email } = data;
   if (!email) {
     throw createError(400, "Missing required param");
@@ -68,7 +68,7 @@ module.exports.searchAuthorAndPopulateRecipe = async (data) => {
   };
 };
 
-module.exports.deleteAuthor = async (email) => {
+module.exports.deleteAuthorWithAuthorEmail = async (email) => {
   if (!email) {
     throw createError(400, "Missing required param");
   }
@@ -84,7 +84,7 @@ module.exports.deleteAuthor = async (email) => {
   return author;
 };
 
-module.exports.updateAuthor = async (email, data) => {
+module.exports.updateAuthorWithAuthorEmail = async (email, data) => {
   if (!email) {
     throw createError(400, "Missing required param");
   }

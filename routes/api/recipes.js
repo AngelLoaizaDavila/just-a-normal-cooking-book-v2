@@ -1,6 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const recipeService = require("../../functions/recipe/service.js");
+const authorService = require("../../functions/author/service.js");
+const authorRecipeService = require("../../functions/author-recipe/service.js");
+
+/*
+ * All routes that have an email param will be replaced by the internal id
+ * of the element. This is just for the sake of simplicity and because the login and authentication
+ * is not implemented yet.
+ * All of those routes will be replaced by a /me route that will be used to get the user id from the token
+ */
+
+// RECIPE ROUTES
+
+// Search for a recipe
 router.get("/recipe/:name", (req, res) => {
   recipeService
     .searchRecipe({ name: req.params.name })
@@ -12,6 +25,7 @@ router.get("/recipe/:name", (req, res) => {
     });
 });
 
+// Search for all recipes
 router.get("/recipes", (req, res) => {
   recipeService
     .findRecipes({ limit: req.query.limit, offset: req.query.offset })
@@ -23,6 +37,7 @@ router.get("/recipes", (req, res) => {
     });
 });
 
+// Create a recipe
 router.post("/recipe", (req, res) => {
   recipeService
     .createRecipe(req.body)
@@ -34,6 +49,7 @@ router.post("/recipe", (req, res) => {
     });
 });
 
+// Update a recipe
 router.put("/recipe/:name", (req, res) => {
   recipeService
     .updateRecipe(req.params.name, req.body)
@@ -45,11 +61,149 @@ router.put("/recipe/:name", (req, res) => {
     });
 });
 
+// Delete a recipe
 router.delete("/recipe/:name", (req, res) => {
   recipeService
     .deleteRecipe(req.params.name)
     .then(() => {
       res.status(204).send();
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// AUTHOR ROUTES
+
+// Create an author
+router.post("/author", (req, res) => {
+  authorService
+    .createAuthor(req.body)
+    .then((author) => {
+      res.status(201).json(author);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Search for an author
+router.get("/author/:email", (req, res) => {
+  authorService
+    .searchAuthorWithAuthorEmail({ email: req.params.email })
+    .then((author) => {
+      res.status(200).json(author);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Search for all recipes from an author
+router.get("/author/:email/recipes", (req, res) => {
+  authorService
+    .searchAuthorAndPopulateRecipeWithAuthorEmail({ email: req.params.email })
+    .then((author) => {
+      res.status(200).json(author);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Delete an author
+router.delete("/author/:email", (req, res) => {
+  authorService
+    .deleteAuthorWithAuthorEmail({ authorEmail: req.params.email })
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Update an author
+router.update("/author/:email", (req, res) => {
+  authorService
+    .updateAuthorWithAuthorEmail({ authorEmail: req.params.email })
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// AUTHOR-RECIPE ROUTES
+
+// Search for a recipe from an author
+router.get("/author-recipe/:email/:name", (req, res) => {
+  authorRecipeService
+    .searchAuthorRecipeWithAuthorEmail({
+      authorEmail: req.params.email,
+      name: req.params.name,
+    })
+    .then((authorRecipe) => {
+      res.status(200).json(authorRecipe);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Search for all recipes from an author
+router.get("/author-recipe/:email", (req, res) => {
+  authorRecipeService
+    .findAllAuthorRecipesWithAuthorEmail({
+      authorEmail: req.params.email,
+      limit: req.query.limit,
+      offset: req.query.offset,
+    })
+    .then((authorRecipe) => {
+      res.status(200).json(authorRecipe);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Delete a recipe from an author
+router.delete("/author-recipe/:email/:name", (req, res) => {
+  authorRecipeService
+    .deleteAuthorRecipeWithAuthorEmail({
+      authorEmail: req.params.email,
+      name: req.params.name,
+    })
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Update a recipe from an author
+router.update("/author-recipe/:email/:name", (req, res) => {
+  authorRecipeService
+    .updateAuthorRecipeWithAuthorEmail({
+      authorEmail: req.params.email,
+      name: req.params.name,
+    })
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Create a recipe from an author
+router.post("/author-recipe", (req, res) => {
+  authorRecipeService
+    .createAuthorRecipeWithAuthorEmail(req.body)
+    .then((authorRecipe) => {
+      res.status(201).json(authorRecipe);
     })
     .catch((error) => {
       res.status(error.status).json({ message: error.message });
