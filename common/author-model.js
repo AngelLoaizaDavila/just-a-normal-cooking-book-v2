@@ -14,7 +14,7 @@ const AuthorSchema = new mongoose.Schema({
   recipes: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Recipes",
+      ref: "authorRecipes",
     },
   ],
 },

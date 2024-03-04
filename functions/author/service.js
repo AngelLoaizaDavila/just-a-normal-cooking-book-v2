@@ -1,5 +1,7 @@
 const Author = require("../../common/author-model");
+const AuthorRecipe = require("../../common/author-recipe-model");
 const mongo = require("../../common/db/mongo");
+const createError = require("http-errors");
 module.exports.createAuthor = async (data) => {
   const { name, email } = data;
   if (!name || !email) {
@@ -37,6 +39,33 @@ module.exports.searchAuthor = async (data) => {
   }
   await mongo.disconnect();
   return author;
+};
+module.exports.searchAuthorAndPopulateRecipe = async (data) => {
+  const { email } = data;
+  if (!email) {
+    throw createError(400, "Missing required param");
+  }
+  await mongo.init();
+  const author = await Author.findOne({
+    email: email,
+  });
+  if (!author) {
+    await mongo.disconnect();
+    throw createError(404, "Author not found");
+  }
+  if (author.recipes.length === 0) {
+    await mongo.disconnect();
+    throw createError(404, "Author has no recipes");
+  }
+  const authorRecipes = await AuthorRecipe.find({
+    _id: { $in: author.recipes },
+  })
+  console.log(authorRecipes);
+  await mongo.disconnect();
+  return {
+    author,
+    authorRecipes,
+  };
 };
 
 module.exports.deleteAuthor = async (email) => {
