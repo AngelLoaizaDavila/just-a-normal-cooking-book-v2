@@ -5,7 +5,7 @@ const mongo = require("../../common/db/mongo");
 const mongoose = require("mongoose");
 
 module.exports.createUser = async (data) => {
-  const { email, password, name} = data;
+  const { email, password, name } = data;
   await mongo.init();
   const alreadyExists = await User.findOne({ email, deleted: false });
   if (alreadyExists) {
@@ -27,8 +27,9 @@ module.exports.createUser = async (data) => {
     name: name.trim(),
     token: jwtToken,
   });
+  await user.save();
   await mongo.disconnect();
-  return user.save();
+  return user;
 };
 
 module.exports.searchUser = async (data) => {
@@ -36,7 +37,7 @@ module.exports.searchUser = async (data) => {
   await mongo.init();
   const user = await User.findOne({ email, deleted: false });
   if (!user) {
-    throw new Error("User not found");
+    return null;
   }
   await mongo.disconnect();
   return user;
@@ -69,11 +70,16 @@ module.exports.refreshToken = async (data) => {
   if (!user) {
     throw new Error("User not found");
   }
-  const jwtToken = token.generateToken({ email, date: Date.now() });
+  const jwtToken = token.generateToken({
+    email,
+    userId: user._id,
+    role: "USER",
+    date: Date.now(),
+  });
   user.token = jwtToken;
   await user.save();
   await mongo.disconnect();
-  return user;
+  return { accessToken: user.token };
 };
 
 module.exports.deleteUser = async (data) => {

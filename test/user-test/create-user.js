@@ -4,9 +4,9 @@ require("dotenv").config({ path: "../../.env" });
 
 const main = async () => {
   const user = {
-    email: "test@test.com",
-    password: "test",
-    name: "test",
+    email: "testcreated001@test.com",
+    password: "test001",
+    name: "test001",
   };
 
   const userCreated = await userService.createUser(user);
