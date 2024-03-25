@@ -3,6 +3,7 @@ const authorService = require("../author/service");
 const util = require("../../common/utils");
 const bcrypt = require("bcrypt");
 const token = require("../jwt-token/service");
+const createError = require("http-errors");
 module.exports.registerUser = async (data) => {
   const { email, password, name } = data;
   // Check if email is valid
@@ -16,30 +17,35 @@ module.exports.registerUser = async (data) => {
   // Check if user already exists
   const user = await userService.searchUser({ email });
   if (user || user !== null) {
-    throw new Error("User already exists");
+    throw new createError(409, "User already exists");
+  }
+  let createdUser, createdAuthor;
+  try {
+    createdUser = await userService.createUser({ email, password, name });
+  } catch (error) {
+    throw new createError(500, "Internal server error: Error creating user");
   }
   try {
-    const createdUser = await userService.createUser({ email, password, name });
-    const createdAuthor = await authorService.createAuthor({
+    createdAuthor = await authorService.createAuthor({
       email,
       name,
       userId: createdUser._id,
     });
-    return {
-      user: {
-        email: createdUser.email,
-        name: createdUser.name,
-      },
-      author: {
-        email: createdAuthor.email,
-        name: createdAuthor.name,
-      },
-      token: createdUser.token,
-    };
   } catch (error) {
     console.log(error);
-    throw new Error("Error creating user");
+    throw new createError(500, "Internal server error: Error creating author");
   }
+  return {
+    user: {
+      email: createdUser.email,
+      name: createdUser.name,
+    },
+    author: {
+      email: createdAuthor.email,
+      name: createdAuthor.name,
+    },
+    token: createdUser.token,
+  };
 };
 
 module.exports.loginUser = async (data) => {

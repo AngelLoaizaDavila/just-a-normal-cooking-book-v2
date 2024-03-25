@@ -9,6 +9,7 @@ module.exports.createUser = async (data) => {
   await mongo.init();
   const alreadyExists = await User.findOne({ email, deleted: false });
   if (alreadyExists) {
+    await mongo.disconnect();
     throw new Error("User already exists");
   }
   const saltRounds = 10;
@@ -37,6 +38,7 @@ module.exports.searchUser = async (data) => {
   await mongo.init();
   const user = await User.findOne({ email, deleted: false });
   if (!user) {
+    await mongo.disconnect();
     return null;
   }
   await mongo.disconnect();
@@ -48,6 +50,7 @@ module.exports.updateUser = async (data) => {
   await mongo.init();
   const user = await User.findOne({ email, deleted: false });
   if (!user) {
+    await mongo.disconnect();
     throw new Error("User not found");
   }
   const saltRounds = 10;
@@ -68,6 +71,7 @@ module.exports.refreshToken = async (data) => {
   await mongo.init();
   const user = await User.findOne({ email, deleted: false });
   if (!user) {
+    await mongo.disconnect();
     throw new Error("User not found");
   }
   const jwtToken = token.generateToken({
@@ -84,12 +88,15 @@ module.exports.refreshToken = async (data) => {
 
 module.exports.deleteUser = async (data) => {
   const { email } = data;
+  await mongo.init();
   const user = await User.findOne({ email, deleted: false });
   if (!user) {
+    await mongo.disconnect();
     throw new Error("User not found");
   }
   user.deleted = true;
   await user.save();
+  await mongo.disconnect();
   return {
     message: "User deleted successfully",
   };
