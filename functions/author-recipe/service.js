@@ -99,6 +99,31 @@ module.exports.findAllAuthorRecipesWithAuthorEmail = async (data) => {
   await mongo.disconnect();
   return recipes;
 };
+module.exports.findAllAuthorRecipesWithUserId = async (data) => {
+  const { userId, limit, offset } = data;
+  if (!userId) {
+    throw createError(400, "missing required params");
+  }
+  await mongo.init();
+  // Check if author exists
+  const authorExists = await Author.findOne({ user: userId });
+  // If author does not exist, return error
+  if (!authorExists) {
+    await mongo.disconnect();
+    throw createError(404, "Author not found");
+  }
+  // Find all recipes from author
+  const recipes = await AuthorRecipe.find({ author: authorExists._id })
+    .skip(offset ? offset : 0)
+    .limit(limit ? limit : 20);
+  // If there are no recipes, return error
+  if (!recipes || recipes.length === 0) {
+    await mongo.disconnect();
+    throw createError(404, "No recipes found");
+  }
+  await mongo.disconnect();
+  return recipes;
+};
 
 module.exports.updateAuthorRecipeWithAuthorEmail = async (data) => {
   const { authorEmail, name, ingredients, steps, portions, cookingTime } = data;

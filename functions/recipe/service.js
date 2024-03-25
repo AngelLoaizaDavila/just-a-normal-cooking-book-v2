@@ -17,13 +17,12 @@ module.exports.searchRecipe = async (data) => {
     await db.disconnect();
     throw createError(404, "Recipe not found");
   }
-  await db.disconnect()
+  await db.disconnect();
   return recipe;
 };
 
 module.exports.findRecipes = async (data) => {
   const { limit, offset } = data || {};
-  console.log({limit: limit, offset: offset})
 
   await db.init();
   const recipes = await Recipe.find({})
@@ -40,7 +39,7 @@ module.exports.findRecipes = async (data) => {
 
 module.exports.createRecipe = async (data) => {
   const { name, ingredients, steps, portions, cookingTime } = data;
-  console.log({data})
+  console.log({ data });
   if (!name || !ingredients || !steps || !portions || !cookingTime) {
     throw createError(400, "missing required params");
   }

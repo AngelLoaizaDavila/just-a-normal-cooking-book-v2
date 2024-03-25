@@ -25,6 +25,10 @@ module.exports.registerUser = async (data) => {
   } catch (error) {
     throw new createError(500, "Internal server error: Error creating user");
   }
+  /**
+   * I don't really like doing this kind of things, create author doesn't belong here
+   * but since i'm not using a microservice architecture, i'm going to do it here
+   */
   try {
     createdAuthor = await authorService.createAuthor({
       email,
@@ -51,16 +55,16 @@ module.exports.registerUser = async (data) => {
 module.exports.loginUser = async (data) => {
   const { email, password } = data;
   if (!util.isValidEmail(email)) {
-    throw new Error("Invalid email");
+    throw new createError(400, "Invalid email");
   }
   const user = await userService.searchUser({ email });
   let userAccessToken = user.token;
   if (!user) {
-    throw new Error("User not found");
+    throw new createError(404, "User not found");
   }
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
-    throw new Error("Incorrect password");
+    throw new createError(401, "Invalid password");
   }
   const verifyToken = token.verifyToken(user.token);
   if (!verifyToken) {

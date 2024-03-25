@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const router = require('./routes/api/recipes.js');
+const router = require('./routes/index');
 
 // Body parser middleware
 app.use(express.json());
