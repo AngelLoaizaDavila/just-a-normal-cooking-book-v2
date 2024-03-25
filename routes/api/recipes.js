@@ -3,6 +3,7 @@ const router = express.Router();
 const recipeService = require("../../functions/recipe/service.js");
 const authorService = require("../../functions/author/service.js");
 const authorRecipeService = require("../../functions/author-recipe/service.js");
+const authService = require('../../functions/auth/service.js')
 
 /*
  * All routes that have an email param will be replaced by the internal id
@@ -210,4 +211,38 @@ router.post("/author-recipe", (req, res) => {
     });
 });
 
+
+// LOGIN AND REGISTER ROUTES
+
+// Register a user
+/**
+ * This function will try to create a user and his author account in the same method
+ * this is not recommended since it's not a good practice to do this in the same method 
+ */
+router.post("/register", (req, res) => {
+  authService
+    .registerUser(req.body)
+    .then((user) => {
+      res.status(201).json(user);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
+
+// Login a user
+/**
+ * This function will try to renew the token if it's expired, so it may take a little longer
+ * to login the user, will be moving to a microservice architecture in the future
+ */
+router.post("/login", (req, res) => {
+  authService
+    .loginUser(req.body)
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((error) => {
+      res.status(error.status).json({ message: error.message });
+    });
+});
 module.exports = router;
