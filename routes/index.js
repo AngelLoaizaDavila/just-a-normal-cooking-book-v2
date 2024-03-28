@@ -4,18 +4,19 @@ const authorRecipeService = require("../functions/author-recipe/service");
 const recipeService = require("../functions/recipe/service");
 const utils = require("../common/utils");
 const middleware = require("../routes/middleware");
-export default function (router) {
-  // Register and Login routes
-  router.post("/register", registerUser);
-  router.post("/login", loginUser);
+const express = require("express");
+const router = express.Router();
 
-  // Author routes
-  router.get("/author", middleware.authenticateToken, getMeAuthorProfile);
-  router.get("/author/recipes", middleware.authenticateToken, getMyRecipes);
+// Register and Login routes
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
-  // recipes routes
-  router.get("/recipes", getRecipes);
-}
+// Author routes
+router.get("/author", middleware.authenticateToken, getMeAuthorProfile);
+router.get("/author/recipes", middleware.authenticateToken, getMyRecipes);
+
+// recipes routes
+router.get("/recipes", getRecipes);
 
 async function registerUser(req, res) {
   const { email, password, name } = req.body;
@@ -38,6 +39,7 @@ async function loginUser(req, res) {
   try {
     const loggedUser = await authService.loginUser({ email, password });
     const response = utils.formatResponse(loggedUser);
+    console.log({ response });
     res.set(response.headers);
     res.status(response.statusCode).send(response.body);
   } catch (error) {
@@ -49,7 +51,7 @@ async function getMeAuthorProfile(req, res) {
   const user = req.user;
   try {
     const authorProfile = await authorService.searchAuthorWithUserId(
-      user.userId
+      {userId: user.userId}
     );
     const response = utils.formatResponse(authorProfile);
     res.set(response.headers);
@@ -89,7 +91,9 @@ async function getRecipes(req, res) {
 }
 
 function handleError(err, res) {
-  console.error(err)
+  console.error(err);
   res.setHeader("content-type", "application/json");
-  res.status(err.status).send({ message: err.message })
+  res.status(err.status).send({ message: err.message });
 }
+
+module.exports = router;

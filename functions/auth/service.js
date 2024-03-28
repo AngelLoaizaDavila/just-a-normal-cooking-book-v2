@@ -70,5 +70,5 @@ module.exports.loginUser = async (data) => {
   if (!verifyToken) {
     userAccessToken = await userService.refreshToken({ email });
   }
-  return userAccessToken;
+  return { token: userAccessToken };
 };
